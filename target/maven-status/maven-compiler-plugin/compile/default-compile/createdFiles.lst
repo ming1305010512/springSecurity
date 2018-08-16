@@ -1,0 +1,2 @@
+com\yibai\web\controller\HelloController.class
+com\yibai\web\security\AuthenticationSuccessHandlerImpl.class

@@ -32,8 +32,6 @@
             就能成功访问对应的url
         -->
         <intercept-url pattern="/**" access="ROLE_USER" />
-
-        <http-basic/>
     </http>
 
     <beans:bean id="authSuccess" class="com.yibai.web.security.AuthenticationSuccessHandlerImpl"/>
