@@ -1,0 +1,52 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--auto-config为true时，会自动配置<security:form-login/>、<security:http-basic/>、<security:logout/>-->
+    <http auto-config="true">
+        <!--
+        username-parameter:登陆时用户名使用的哪个参数
+        password-parameter：登陆时密码使用的是哪个参数
+        login-processing-url：登陆时提交的地址
+        authentication-success-handler-ref:authentication-success-handler-ref 对应一个 AuthencticationSuccessHandler 实现类的引用
+            如果指定了 authentication-success-handler-ref，登录认证成功后会调用指定 AuthenticationSuccessHandler 的 onAuthenticationSuccess 方法
+        -->
+        <form-login login-page="/views/login.jsp" username-parameter="username" password-parameter="password"
+                    login-processing-url="/login.do" authentication-success-handler-ref="authSuccess"
+                    authentication-failure-url="/views/login_failure.jsp"
+        />
+        <!--
+        之前配置的是所有的请求都需要ROLE_USER权限，所以我们定义的/login.html也需要该权限
+        这样会造成一个死循环，可以通过下面的配置，将/login.htm的访问权限设置为IS_AUTHENTICATED_ANONYMOUSLY或
+        ROLE_ANONYMOUS
+        来解决这个问题
+        -->
+        <intercept-url pattern="/views/login*.jsp" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+
+        <!--定义了一个权限控制的规则,pattern表示我们将对哪些url进行控制，可以是一个正则表达式-->
+        <!--access属性表示在请求对应的url时需要什么权限，以，号分隔，请求的用户只需拥有其中一个角色
+            就能成功访问对应的url
+        -->
+        <intercept-url pattern="/**" access="ROLE_USER" />
+    </http>
+
+    <beans:bean id="authSuccess" class="com.yibai.web.security.AuthenticationSuccessHandlerImpl"/>
+    <!--定义一个 AuthenticationManager 用于认证-->
+    <!--authentication-manager元素指定了一个AuthenticationManager，需要一个AuthenticationProvider来进行真正的验证
+        默认情况下authentication-provider对应一个DaoAuthenticationProvider，需要UserDetailsService来获取用户信息UserDetails（对应user元素）
+        user-service还支持properties文件来指定用户信息
+    -->
+    <authentication-manager>
+        <authentication-provider>
+            <user-service>
+                <user name="user" password="user" authorities="ROLE_USER" />
+                <user name="admin" password="admin" authorities="ROLE_USER,ROLE_ADMIN" />
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+
+</beans:beans>
